@@ -54,8 +54,8 @@
       </div>
       <h1 class="m-0 text-[17px] font-medium -tracking-[0.3px]">repo-receptor</h1>
     </div>
-    <a href="/profile" class="flex h-8 w-8 items-center justify-center rounded-full bg-[#EEEDFE] text-xs font-medium text-[#3C3489]">
-      DM
+    <a href="/profile" class="flex h-8 w-8 items-center justify-center rounded-full bg-[#EEEDFE]">
+      <svg width="16" height="16" viewBox="0 0 20 20" fill="none" stroke="#3C3489" stroke-width="1.5"><circle cx="10" cy="7" r="3"/><path d="M3 17c0-3.5 3-6 7-6s7 2.5 7 6"/></svg>
     </a>
   </header>
 
