@@ -1,5 +1,11 @@
 <script>
   import { supabase } from '$lib/supabase.js';
+  let { data } = $props();
+
+  // Redirect if already signed in.
+  $effect(() => {
+    if (data.session) window.location.href = '/';
+  });
 
   async function signInWithGitHub() {
     const { error } = await supabase.auth.signInWithOAuth({

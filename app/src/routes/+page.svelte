@@ -1,6 +1,11 @@
 <script>
   import { mockRepos, statusMeta } from '$lib/data/mock.js';
 
+  let { data } = $props();
+
+  const loading = $derived(data.repos === undefined);
+  const allRepos = $derived(data.repos ?? mockRepos);
+
   let query = $state('');
   let activeChip = $state('all');
 
@@ -13,7 +18,7 @@
   ];
 
   const filtered = $derived.by(() => {
-    let r = mockRepos;
+    let r = allRepos;
     if (activeChip !== 'all') {
       r = r.filter(repo => repo.status === activeChip);
     }
@@ -28,9 +33,9 @@
   });
 
   const stats = $derived({
-    total: mockRepos.length,
-    deployed: mockRepos.filter(r => r.status === 'deployed').length,
-    failing: mockRepos.filter(r => r.status === 'failing').length
+    total: allRepos.length,
+    deployed: allRepos.filter(r => r.status === 'deployed').length,
+    failing: allRepos.filter(r => r.status === 'failing').length
   });
 </script>
 
@@ -38,7 +43,7 @@
   <title>Feed · repo-receptor</title>
 </svelte:head>
 
-<div class="flex min-h-dvh flex-col bg-white">
+<div class="flex h-dvh flex-col bg-white">
   <!-- Header -->
   <header class="flex items-center justify-between border-b border-black/5 px-4 py-3">
     <div class="flex items-center gap-2">
@@ -107,44 +112,64 @@
 
     <!-- Feed -->
     <div class="px-4">
-      {#each filtered as repo (repo.id)}
-        {@const meta = statusMeta[repo.status]}
-        <a
-          href="/repo/{repo.owner}/{repo.name}"
-          class="mb-2.5 block rounded-xl border border-black/5 bg-white p-3 no-underline"
-        >
-          <div class="mb-2 flex items-start justify-between gap-2">
-            <div class="min-w-0">
-              <p class="m-0 font-mono text-sm font-medium">{repo.name}</p>
-              <p class="mt-0.5 font-mono text-[11px] text-[#888780]">{repo.owner}</p>
+      {#if loading}
+        {#each Array(4) as _}
+          <div class="mb-2.5 rounded-xl border border-black/5 bg-white p-3">
+            <div class="mb-2 flex items-start justify-between gap-2">
+              <div class="min-w-0">
+                <div class="skeleton h-4 w-32 rounded"></div>
+                <div class="skeleton mt-1.5 h-3 w-20 rounded"></div>
+              </div>
+              <div class="skeleton h-5 w-16 rounded-full"></div>
             </div>
-            <span
-              class="inline-flex flex-shrink-0 items-center gap-1 rounded-full px-2 py-0.5 font-mono text-[11px] font-medium"
-              style="background: {meta.bg}; color: {meta.fg}"
-            >
-              <span class="inline-block h-1.5 w-1.5 rounded-full" style="background: {meta.dot}"></span>
-              {meta.label}
-            </span>
+            <div class="skeleton mb-2.5 h-3 w-3/4 rounded"></div>
+            <div class="flex items-center gap-3 border-t border-black/5 pt-2">
+              <div class="skeleton h-3 w-16 rounded"></div>
+              <div class="skeleton h-3 w-8 rounded"></div>
+              <div class="skeleton ml-auto h-3 w-12 rounded"></div>
+            </div>
           </div>
-          <p class="m-0 mb-2.5 text-xs leading-relaxed text-[#5F5E5A]">
-            {repo.lastCommitMessage}
-            <span class="ml-1 rounded bg-[#F6F5F1] px-1.5 py-px font-mono text-[11px] text-[#888780]">{repo.lastCommitSha}</span>
-          </p>
-          <div class="flex items-center gap-3 border-t border-black/5 pt-2">
-            <span class="flex items-center gap-1 text-[11px] text-[#5F5E5A]">
-              <span class="inline-block h-2 w-2 rounded-full" style="background: {repo.languageColor}"></span>
-              {repo.language}
-            </span>
-            <span class="text-[11px] text-[#5F5E5A]">{repo.lastCommitAt}</span>
-            <span class="ml-auto font-mono text-[11px] text-[#888780]">{repo.branch}</span>
-          </div>
-        </a>
+        {/each}
       {:else}
-        <div class="rounded-xl border border-black/5 bg-[#F6F5F1] p-8 text-center">
-          <p class="m-0 mb-1 text-sm font-medium">No matches</p>
-          <p class="m-0 text-xs text-[#5F5E5A]">Try clearing the filter or search.</p>
-        </div>
-      {/each}
+        {#each filtered as repo (repo.id)}
+          {@const meta = statusMeta[repo.status]}
+          <a
+            href="/repo/{repo.owner}/{repo.name}"
+            class="mb-2.5 block rounded-xl border border-black/5 bg-white p-3 no-underline"
+          >
+            <div class="mb-2 flex items-start justify-between gap-2">
+              <div class="min-w-0">
+                <p class="m-0 font-mono text-sm font-medium">{repo.name}</p>
+                <p class="mt-0.5 font-mono text-[11px] text-[#888780]">{repo.owner}</p>
+              </div>
+              <span
+                class="inline-flex flex-shrink-0 items-center gap-1 rounded-full px-2 py-0.5 font-mono text-[11px] font-medium"
+                style="background: {meta.bg}; color: {meta.fg}"
+              >
+                <span class="inline-block h-1.5 w-1.5 rounded-full" style="background: {meta.dot}"></span>
+                {meta.label}
+              </span>
+            </div>
+            <p class="m-0 mb-2.5 text-xs leading-relaxed text-[#5F5E5A]">
+              {repo.lastCommitMessage}
+              <span class="ml-1 rounded bg-[#F6F5F1] px-1.5 py-px font-mono text-[11px] text-[#888780]">{repo.lastCommitSha}</span>
+            </p>
+            <div class="flex items-center gap-3 border-t border-black/5 pt-2">
+              <span class="flex items-center gap-1 text-[11px] text-[#5F5E5A]">
+                <span class="inline-block h-2 w-2 rounded-full" style="background: {repo.languageColor}"></span>
+                {repo.language}
+              </span>
+              <span class="text-[11px] text-[#5F5E5A]">{repo.lastCommitAt}</span>
+              <span class="ml-auto font-mono text-[11px] text-[#888780]">{repo.branch}</span>
+            </div>
+          </a>
+        {:else}
+          <div class="rounded-xl border border-black/5 bg-[#F6F5F1] p-8 text-center">
+            <p class="m-0 mb-1 text-sm font-medium">No matches</p>
+            <p class="m-0 text-xs text-[#5F5E5A]">Try clearing the filter or search.</p>
+          </div>
+        {/each}
+      {/if}
       <div class="h-3"></div>
     </div>
   </div>
@@ -173,4 +198,13 @@
 <style>
   .no-scrollbar::-webkit-scrollbar { display: none; }
   .no-scrollbar { scrollbar-width: none; }
+  .skeleton {
+    background: linear-gradient(90deg, #F6F5F1 25%, #EEEDEA 50%, #F6F5F1 75%);
+    background-size: 200% 100%;
+    animation: shimmer 1.2s ease-in-out infinite;
+  }
+  @keyframes shimmer {
+    0% { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+  }
 </style>
