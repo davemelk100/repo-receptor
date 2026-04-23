@@ -1,10 +1,10 @@
 <script>
-  import { mockRepos, statusMeta } from '$lib/data/mock.js';
+  import { statusMeta } from '$lib/data/mock.js';
 
   let { data } = $props();
 
   const loading = $derived(data.repos === undefined);
-  const allRepos = $derived(data.repos ?? mockRepos);
+  const allRepos = $derived(data.repos ?? []);
 
   let query = $state('');
   let activeChip = $state('all');
@@ -131,44 +131,52 @@
           </div>
         {/each}
       {:else}
-        {#each filtered as repo (repo.id)}
-          {@const meta = statusMeta[repo.status]}
-          <a
-            href="/repo/{repo.owner}/{repo.name}"
-            class="mb-2.5 block rounded-xl border border-black/5 bg-white p-3 no-underline"
-          >
-            <div class="mb-2 flex items-start justify-between gap-2">
-              <div class="min-w-0">
-                <p class="m-0 font-mono text-sm font-medium">{repo.name}</p>
-                <p class="mt-0.5 font-mono text-[11px] text-[#888780]">{repo.owner}</p>
-              </div>
-              <span
-                class="inline-flex flex-shrink-0 items-center gap-1 rounded-full px-2 py-0.5 font-mono text-[11px] font-medium"
-                style="background: {meta.bg}; color: {meta.fg}"
-              >
-                <span class="inline-block h-1.5 w-1.5 rounded-full" style="background: {meta.dot}"></span>
-                {meta.label}
-              </span>
-            </div>
-            <p class="m-0 mb-2.5 text-xs leading-relaxed text-[#5F5E5A]">
-              {repo.lastCommitMessage}
-              <span class="ml-1 rounded bg-[#F6F5F1] px-1.5 py-px font-mono text-[11px] text-[#888780]">{repo.lastCommitSha}</span>
-            </p>
-            <div class="flex items-center gap-3 border-t border-black/5 pt-2">
-              <span class="flex items-center gap-1 text-[11px] text-[#5F5E5A]">
-                <span class="inline-block h-2 w-2 rounded-full" style="background: {repo.languageColor}"></span>
-                {repo.language}
-              </span>
-              <span class="text-[11px] text-[#5F5E5A]">{repo.lastCommitAt}</span>
-              <span class="ml-auto font-mono text-[11px] text-[#888780]">{repo.branch}</span>
-            </div>
-          </a>
-        {:else}
+        {#if allRepos.length === 0 && !query.trim()}
           <div class="rounded-xl border border-black/5 bg-[#F6F5F1] p-8 text-center">
-            <p class="m-0 mb-1 text-sm font-medium">No matches</p>
-            <p class="m-0 text-xs text-[#5F5E5A]">Try clearing the filter or search.</p>
+            <p class="m-0 mb-1 text-sm font-medium">No repos yet</p>
+            <p class="m-0 text-xs text-[#5F5E5A]">Sign in with GitHub to see your production feed.</p>
+            <a href="/signin" class="mt-4 inline-block rounded-full bg-neutral-900 px-5 py-2 text-xs font-medium text-white no-underline">Sign in</a>
           </div>
-        {/each}
+        {:else}
+          {#each filtered as repo (repo.id)}
+            {@const meta = statusMeta[repo.status]}
+            <a
+              href="/repo/{repo.owner}/{repo.name}"
+              class="mb-2.5 block rounded-xl border border-black/5 bg-white p-3 no-underline"
+            >
+              <div class="mb-2 flex items-start justify-between gap-2">
+                <div class="min-w-0">
+                  <p class="m-0 font-mono text-sm font-medium">{repo.name}</p>
+                  <p class="mt-0.5 font-mono text-[11px] text-[#888780]">{repo.owner}</p>
+                </div>
+                <span
+                  class="inline-flex flex-shrink-0 items-center gap-1 rounded-full px-2 py-0.5 font-mono text-[11px] font-medium"
+                  style="background: {meta.bg}; color: {meta.fg}"
+                >
+                  <span class="inline-block h-1.5 w-1.5 rounded-full" style="background: {meta.dot}"></span>
+                  {meta.label}
+                </span>
+              </div>
+              <p class="m-0 mb-2.5 text-xs leading-relaxed text-[#5F5E5A]">
+                {repo.lastCommitMessage}
+                <span class="ml-1 rounded bg-[#F6F5F1] px-1.5 py-px font-mono text-[11px] text-[#888780]">{repo.lastCommitSha}</span>
+              </p>
+              <div class="flex items-center gap-3 border-t border-black/5 pt-2">
+                <span class="flex items-center gap-1 text-[11px] text-[#5F5E5A]">
+                  <span class="inline-block h-2 w-2 rounded-full" style="background: {repo.languageColor}"></span>
+                  {repo.language}
+                </span>
+                <span class="text-[11px] text-[#5F5E5A]">{repo.lastCommitAt}</span>
+                <span class="ml-auto font-mono text-[11px] text-[#888780]">{repo.branch}</span>
+              </div>
+            </a>
+          {:else}
+            <div class="rounded-xl border border-black/5 bg-[#F6F5F1] p-8 text-center">
+              <p class="m-0 mb-1 text-sm font-medium">No matches</p>
+              <p class="m-0 text-xs text-[#5F5E5A]">Try clearing the filter or search.</p>
+            </div>
+          {/each}
+        {/if}
       {/if}
       <div class="h-3"></div>
     </div>

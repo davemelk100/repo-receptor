@@ -1,10 +1,10 @@
 <script>
-  import { mockRepos, statusMeta } from '$lib/data/mock.js';
+  import { statusMeta } from '$lib/data/mock.js';
 
   let { data } = $props();
 
   const loading = $derived(data.repos === undefined);
-  const allRepos = $derived(data.repos ?? mockRepos);
+  const allRepos = $derived(data.repos ?? []);
 
   let query = $state('');
 
@@ -60,41 +60,49 @@
           </div>
         {/each}
       {:else}
-        {#each filtered as repo (repo.id)}
-          {@const meta = statusMeta[repo.status]}
-          <a
-            href="/repo/{repo.owner}/{repo.name}"
-            class="flex items-center gap-3 border-b border-black/5 py-3 no-underline"
-          >
-            <div class="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-lg bg-[#F6F5F1]">
-              <span class="inline-block h-2.5 w-2.5 rounded-full" style="background: {repo.languageColor}"></span>
-            </div>
-            <div class="min-w-0 flex-1">
-              <div class="flex items-center gap-2">
-                <p class="m-0 truncate font-mono text-sm font-medium">{repo.name}</p>
-                <span
-                  class="inline-flex flex-shrink-0 items-center gap-1 rounded-full px-1.5 py-0.5 font-mono text-[10px] font-medium"
-                  style="background: {meta.bg}; color: {meta.fg}"
-                >
-                  <span class="inline-block h-1.5 w-1.5 rounded-full" style="background: {meta.dot}"></span>
-                  {meta.label}
-                </span>
-              </div>
-              <p class="m-0 mt-0.5 truncate text-xs text-[#5F5E5A]">{repo.description}</p>
-              <div class="mt-1 flex items-center gap-3 text-[11px] text-[#888780]">
-                <span>{repo.language}</span>
-                <span>{repo.owner}</span>
-                <span class="font-mono">{repo.branch}</span>
-              </div>
-            </div>
-            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="#888780" stroke-width="1.5" class="flex-shrink-0"><path d="M6 4l4 4-4 4"/></svg>
-          </a>
-        {:else}
+        {#if allRepos.length === 0 && !query.trim()}
           <div class="rounded-xl border border-black/5 bg-[#F6F5F1] p-8 text-center mt-2">
-            <p class="m-0 mb-1 text-sm font-medium">No matches</p>
-            <p class="m-0 text-xs text-[#5F5E5A]">Try a different search term.</p>
+            <p class="m-0 mb-1 text-sm font-medium">No apps yet</p>
+            <p class="m-0 text-xs text-[#5F5E5A]">Sign in with GitHub to see your connected repos.</p>
+            <a href="/signin" class="mt-4 inline-block rounded-full bg-neutral-900 px-5 py-2 text-xs font-medium text-white no-underline">Sign in</a>
           </div>
-        {/each}
+        {:else}
+          {#each filtered as repo (repo.id)}
+            {@const meta = statusMeta[repo.status]}
+            <a
+              href="/repo/{repo.owner}/{repo.name}"
+              class="flex items-center gap-3 border-b border-black/5 py-3 no-underline"
+            >
+              <div class="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-lg bg-[#F6F5F1]">
+                <span class="inline-block h-2.5 w-2.5 rounded-full" style="background: {repo.languageColor}"></span>
+              </div>
+              <div class="min-w-0 flex-1">
+                <div class="flex items-center gap-2">
+                  <p class="m-0 truncate font-mono text-sm font-medium">{repo.name}</p>
+                  <span
+                    class="inline-flex flex-shrink-0 items-center gap-1 rounded-full px-1.5 py-0.5 font-mono text-[10px] font-medium"
+                    style="background: {meta.bg}; color: {meta.fg}"
+                  >
+                    <span class="inline-block h-1.5 w-1.5 rounded-full" style="background: {meta.dot}"></span>
+                    {meta.label}
+                  </span>
+                </div>
+                <p class="m-0 mt-0.5 truncate text-xs text-[#5F5E5A]">{repo.description}</p>
+                <div class="mt-1 flex items-center gap-3 text-[11px] text-[#888780]">
+                  <span>{repo.language}</span>
+                  <span>{repo.owner}</span>
+                  <span class="font-mono">{repo.branch}</span>
+                </div>
+              </div>
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="#888780" stroke-width="1.5" class="flex-shrink-0"><path d="M6 4l4 4-4 4"/></svg>
+            </a>
+          {:else}
+            <div class="rounded-xl border border-black/5 bg-[#F6F5F1] p-8 text-center mt-2">
+              <p class="m-0 mb-1 text-sm font-medium">No matches</p>
+              <p class="m-0 text-xs text-[#5F5E5A]">Try a different search term.</p>
+            </div>
+          {/each}
+        {/if}
       {/if}
     </div>
   </div>
